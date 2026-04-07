@@ -192,6 +192,61 @@ To fully complete the original assessment, still add:
 3. last-sent field update on `Account` or `User`
 4. public-site page hosting details and final hosted URL
 
+## External Hosting In `front/`
+
+The repository now includes a Next.js frontend under `front/` that embeds the public Salesforce Screen Flow directly.
+
+This is the simpler public-web approach for the current implementation:
+- host the Screen Flow on a Salesforce public site URL
+- embed that public URL in the Next.js app with an iframe
+
+Frontend host files:
+- `front/app/page.tsx`
+- `front/.env.example`
+
+Required frontend environment variable:
+
+```bash
+NEXT_PUBLIC_SF_PUBLIC_FLOW_URL=https://your-public-site-domain.example.com/your-public-flow-page/
+```
+
+### Org Setup Needed For Public Hosting
+
+To make the flow render from the Next.js host page, complete these Salesforce setup steps:
+1. Create or use a public Salesforce Site or Experience Cloud site endpoint.
+2. Make sure the `Texei_Weather_Lookup` flow is publicly accessible through that endpoint.
+3. Use the public flow URL as `NEXT_PUBLIC_SF_PUBLIC_FLOW_URL`.
+
+Example public URL pattern:
+- direct flow route: `https://your-public-site.example.com/flow/Texei_Weather_Lookup`
+- public page wrapping the flow: `https://your-public-site.example.com/texeiweatherpage/`
+
+The frontend iframe includes `allow="geolocation"` so the embedded flow can still use browser location from inside the weather component.
+
+### Localhost Framing Setup
+
+If the flow page loads in Salesforce but fails inside the Next.js iframe with an error like:
+
+```text
+Framing 'https://...my.site.com/' violates the following Content Security Policy directive: "frame-ancestors 'self'".
+```
+
+the issue is not the Next.js app. Salesforce is blocking external framing.
+
+To allow localhost or another external host to embed the public page:
+1. Open `Setup -> Digital Experiences -> All Sites`.
+2. Open your site.
+3. Go to the site security settings.
+4. Add the external origin to the site's trusted iframe / trusted domains settings.
+5. For local development, add the exact origin, for example `http://localhost:3000`.
+6. Publish the site again.
+
+The origin must match exactly, including protocol and port.
+
+### Build Status For `front/`
+
+The Next.js app builds successfully with the public Flow embed in place.
+
 ## Test Credentials
 
 Salesforce:

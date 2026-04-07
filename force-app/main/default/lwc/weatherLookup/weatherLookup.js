@@ -7,7 +7,7 @@ const DEFAULT_MODE = 'auto';
 export default class WeatherLookup extends LightningElement {
     @api recordId;
     @api mode = DEFAULT_MODE;
-    @api allowBrowserLocation = false;
+    @api allowBrowserLocation;
     @api autoLoad = false;
 
     @api resolvedLocation;
@@ -126,7 +126,11 @@ export default class WeatherLookup extends LightningElement {
     }
 
     get showLocationButton() {
-        return this.toBoolean(this.allowBrowserLocation);
+        if (!this.recordId) {
+            return true;
+        }
+
+        return this.toBooleanOrDefault(this.allowBrowserLocation, true);
     }
 
     get displayIconGlyph() {
@@ -156,8 +160,8 @@ export default class WeatherLookup extends LightningElement {
         this.syncInputValue('inputLatitude', this.latitude, true);
         this.syncInputValue('inputLongitude', this.longitude, true);
         this.mode = this.normalizeString(this.mode) || DEFAULT_MODE;
-        this.allowBrowserLocation = this.toBoolean(this.allowBrowserLocation);
-        this.autoLoad = this.toBoolean(this.autoLoad);
+        this.allowBrowserLocation = this.toBooleanOrDefault(this.allowBrowserLocation, true);
+        this.autoLoad = this.toBooleanOrDefault(this.autoLoad, false);
     }
 
     handleInputChange(event) {
@@ -376,6 +380,14 @@ export default class WeatherLookup extends LightningElement {
 
     toBoolean(value) {
         return value === true || value === 'true';
+    }
+
+    toBooleanOrDefault(value, defaultValue) {
+        if (value === null || value === undefined || value === '') {
+            return defaultValue;
+        }
+
+        return this.toBoolean(value);
     }
 
     firstPresent(...values) {
