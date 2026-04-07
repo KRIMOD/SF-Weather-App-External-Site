@@ -1,6 +1,9 @@
 import { LightningElement, api } from 'lwc';
 import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
 import getWeather from '@salesforce/apex/WeatherController.getWeather';
+import getAccountContacts from '@salesforce/apex/WeatherController.getAccountContacts';
+import getOrgUsers from '@salesforce/apex/WeatherController.getOrgUsers';
+import sendWeatherReport from '@salesforce/apex/WeatherController.sendWeatherReport';
 
 const DEFAULT_MODE = 'auto';
 
@@ -29,6 +32,12 @@ export default class WeatherLookup extends LightningElement {
     inputLongitude = '';
     weatherSource;
     isLoading = false;
+    isSending = false;
+    sendResultMessage;
+    recipientOptions = [];
+    selectedRecipientIds = [];
+    recipientSearchTerm = '';
+    isLoadingRecipients = false;
     _city;
     _state;
     _country;
@@ -87,6 +96,7 @@ export default class WeatherLookup extends LightningElement {
 
     connectedCallback() {
         this.initializeInputs();
+        void this.loadRecipientOptions();
 
         if (this.shouldAutoLoad) {
             void this.loadWeather();
@@ -122,7 +132,7 @@ export default class WeatherLookup extends LightningElement {
     }
 
     get disableFetchButton() {
-        return this.isLoading || !this.canFetchWeather;
+        return this.isLoading || this.isSending || !this.canFetchWeather;
     }
 
     get showLocationButton() {
@@ -145,8 +155,94 @@ export default class WeatherLookup extends LightningElement {
         return this.temperature ? `${this.temperature} C` : '--';
     }
 
+    get canSendReport() {
+        return this.showWeatherSummary && !this.isLoading && !this.isSending && Boolean(this.reportText);
+    }
+
+    get disableSendButton() {
+        return !this.canSendReport;
+    }
+
+    get sendButtonLabel() {
+        return this.recordId ? 'Send To Contacts' : 'Send To Org Users';
+    }
+
+    get recipientSearchLabel() {
+        return this.recordId ? 'Select Contacts' : 'Select Org Users';
+    }
+
+    get recipientSearchPlaceholder() {
+        return this.recordId ? 'Search contacts' : 'Search org users';
+    }
+
+    get showRecipientSelector() {
+        return Boolean(this.recordId || this.isLoadingRecipients || this.recipientOptions.length);
+    }
+
+    get selectedRecipientPills() {
+        const selectedIds = new Set(this.selectedRecipientIds);
+        return this.recipientOptions.filter((option) => selectedIds.has(option.value));
+    }
+
+    get hasSelectedRecipients() {
+        return this.selectedRecipientPills.length > 0;
+    }
+
+    get filteredRecipientOptions() {
+        const selectedIds = new Set(this.selectedRecipientIds);
+        const searchTerm = this.recipientSearchTerm.trim().toLowerCase();
+
+        return this.recipientOptions.filter((option) => {
+            if (selectedIds.has(option.value)) {
+                return false;
+            }
+
+            if (!searchTerm) {
+                return true;
+            }
+
+            return option.label.toLowerCase().includes(searchTerm) || option.email.toLowerCase().includes(searchTerm);
+        });
+    }
+
+    get hasFilteredRecipientOptions() {
+        return this.filteredRecipientOptions.length > 0;
+    }
+
+    get recipientSelectorHelpText() {
+        if (this.isLoadingRecipients) {
+            return this.recordId ? 'Loading related contacts...' : 'Loading org users...';
+        }
+
+        if (!this.recipientOptions.length) {
+            return this.recordId
+                ? 'No related contacts with email addresses are available for this Account.'
+                : 'No org users with email addresses are available.';
+        }
+
+        if (!this.selectedRecipientIds.length) {
+            return this.recordId
+                ? 'Leave blank to send the report to all related contacts.'
+                : 'Leave blank to send the report to all org users.';
+        }
+
+        return `${this.selectedRecipientIds.length} recipient(s) selected.`;
+    }
+
     get humidityDisplay() {
         return this.humidity ? `${this.humidity}%` : '--';
+    }
+
+    get showWeatherSummary() {
+        return Boolean(
+            this.hasWeather ||
+                this.reportText ||
+                this.resolvedLocation ||
+                this.temperature ||
+                this.humidity ||
+                this.windSpeed ||
+                this.condition
+        );
     }
 
     get windSpeedDisplay() {
@@ -172,6 +268,57 @@ export default class WeatherLookup extends LightningElement {
         await this.loadWeather();
     }
 
+    async handleSendWeatherReport() {
+        if (!this.canSendReport) {
+            return;
+        }
+
+        this.isSending = true;
+        this.sendResultMessage = null;
+        this.updateOutput('errorMessage', null);
+
+        try {
+            const result = await sendWeatherReport({
+                recordId: this.recordId || null,
+                selectedRecipientIds: this.selectedRecipientIds,
+                reportText: this.reportText,
+                resolvedLocation: this.resolvedLocation,
+                condition: this.condition,
+                temperature: this.temperature,
+                humidity: this.humidity,
+                windSpeed: this.windSpeed
+            });
+
+            const recipientLabel = result?.recipientType || (this.recordId ? 'contacts' : 'org users');
+            const recipientCount = result?.recipientCount || 0;
+            this.sendResultMessage = `Weather report sent to ${recipientCount} ${recipientLabel}.`;
+        } catch (error) {
+            this.sendResultMessage = null;
+            this.setError(this.reduceError(error));
+        } finally {
+            this.isSending = false;
+        }
+    }
+
+    handleRecipientSearchChange(event) {
+        this.recipientSearchTerm = event.target.value || '';
+    }
+
+    handleRecipientSelect(event) {
+        const recipientId = event.currentTarget.dataset.recipientId;
+        if (!recipientId || this.selectedRecipientIds.includes(recipientId)) {
+            return;
+        }
+
+        this.selectedRecipientIds = [...this.selectedRecipientIds, recipientId];
+        this.recipientSearchTerm = '';
+    }
+
+    handleRecipientRemove(event) {
+        const recipientId = event.currentTarget.name;
+        this.selectedRecipientIds = this.selectedRecipientIds.filter((selectedId) => selectedId !== recipientId);
+    }
+
     handleUseMyLocation() {
         if (!navigator?.geolocation) {
             this.setError('Browser geolocation is not available in this environment.');
@@ -180,6 +327,7 @@ export default class WeatherLookup extends LightningElement {
 
         this.isLoading = true;
         this.updateOutput('errorMessage', null);
+        this.sendResultMessage = null;
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -248,6 +396,28 @@ export default class WeatherLookup extends LightningElement {
         }
     }
 
+    async loadRecipientOptions() {
+        this.isLoadingRecipients = true;
+
+        try {
+            const recipients = this.recordId
+                ? await getAccountContacts({ accountId: this.recordId })
+                : await getOrgUsers();
+
+            this.recipientOptions = Array.isArray(recipients) ? recipients : [];
+            if (!this.recordId) {
+                this.selectedRecipientIds = this.recipientOptions
+                    .filter((option) => option.isDefault)
+                    .map((option) => option.value);
+            }
+        } catch (error) {
+            this.recipientOptions = [];
+            this.setError(this.reduceError(error));
+        } finally {
+            this.isLoadingRecipients = false;
+        }
+    }
+
     buildRequest(overrides = {}) {
         const city = this.firstPresent(overrides.city, this.inputCity, this.city);
         const state = this.firstPresent(overrides.state, this.inputState, this.state);
@@ -308,6 +478,7 @@ export default class WeatherLookup extends LightningElement {
 
     clearWeather() {
         this.weatherSource = null;
+        this.sendResultMessage = null;
         this.updateOutput('resolvedLocation', null);
         this.updateOutput('resolvedLatitude', null);
         this.updateOutput('resolvedLongitude', null);

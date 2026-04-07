@@ -70,3 +70,51 @@
     font-weight: 700;
     margin-top: 0.25rem;
 }
+
+.success-message {
+    color: #2e844a;
+}
+
+.recipient-selector {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.selector-help {
+    color: #706e6b;
+    font-size: 0.75rem;
+}
+
+.pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.lookup-results {
+    border: 1px solid #d8dde6;
+    border-radius: 0.5rem;
+    max-height: 12rem;
+    overflow-y: auto;
+}
+
+.lookup-option {
+    background: #ffffff;
+    border: 0;
+    border-bottom: 1px solid #eef2f7;
+    color: #080707;
+    cursor: pointer;
+    display: block;
+    padding: 0.75rem;
+    text-align: left;
+    width: 100%;
+}
+
+.lookup-option:last-child {
+    border-bottom: 0;
+}
+
+.lookup-option:hover {
+    background: #f3f6fb;
+}

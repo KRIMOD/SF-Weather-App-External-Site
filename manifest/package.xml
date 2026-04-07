@@ -31,5 +31,11 @@
         <members>Account_Record_Page</members>
         <name>FlexiPage</name>
     </types>
+
+    <types>
+        <members>Account.Weather_Report_Sent_Date__c</members>
+        <name>CustomField</name>
+    </types>
+    
     <version>63.0</version>
 </Package>

@@ -23,6 +23,19 @@ public with sharing class WeatherController {
         @AuraEnabled public String source;
     }
 
+    public class SendReportResult {
+        @AuraEnabled public Integer recipientCount;
+        @AuraEnabled public String recipientType;
+        @AuraEnabled public Datetime sentDate;
+    }
+
+    public class RecipientOption {
+        @AuraEnabled public Id value;
+        @AuraEnabled public String label;
+        @AuraEnabled public String email;
+        @AuraEnabled public Boolean isDefault;
+    }
+
     @AuraEnabled(cacheable=false)
     public static WeatherResult getWeather(
         Id recordId,
@@ -44,6 +57,51 @@ public with sharing class WeatherController {
             request.contextMode = contextMode;
 
             return GeoNamesService.getWeather(request);
+        } catch (Exception ex) {
+            throw new AuraHandledException(ex.getMessage());
+        }
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static SendReportResult sendWeatherReport(
+        Id recordId,
+        List<Id> selectedRecipientIds,
+        String reportText,
+        String resolvedLocation,
+        String condition,
+        String temperature,
+        String humidity,
+        String windSpeed
+    ) {
+        try {
+            return WeatherReportService.sendWeatherReport(
+                recordId,
+                selectedRecipientIds,
+                reportText,
+                resolvedLocation,
+                condition,
+                temperature,
+                humidity,
+                windSpeed
+            );
+        } catch (Exception ex) {
+            throw new AuraHandledException(ex.getMessage());
+        }
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<RecipientOption> getAccountContacts(Id accountId) {
+        try {
+            return WeatherReportService.getAccountContacts(accountId);
+        } catch (Exception ex) {
+            throw new AuraHandledException(ex.getMessage());
+        }
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<RecipientOption> getOrgUsers() {
+        try {
+            return WeatherReportService.getOrgUsers();
         } catch (Exception ex) {
             throw new AuraHandledException(ex.getMessage());
         }
