@@ -1,9 +1,35 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>*</members>
+        <members>GeoNamesService</members>
+        <members>WeatherController</members>
         <name>ApexClass</name>
     </types>
+    <types>
+        <members>GeoNames_Username</members>
+        <name>CustomLabel</name>
+    </types>
+    <types>
+        <members>CustomLabels</members>
+        <name>CustomLabels</name>
+    </types>
+    <types>
+        <members>Texei_Weather_Lookup</members>
+        <name>Flow</name>
+    </types>
+    <types>
+        <members>weatherLookup</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>GeoNames</members>
+        <name>NamedCredential</name>
+    </types>
 
+    <types>
+        <members>Home_Page_Default</members>
+        <members>Account_Record_Page</members>
+        <name>FlexiPage</name>
+    </types>
     <version>63.0</version>
 </Package>

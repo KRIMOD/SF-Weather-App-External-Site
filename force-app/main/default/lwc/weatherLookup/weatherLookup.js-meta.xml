@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>63.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Weather Lookup</masterLabel>
+    <targets>
+        <target>lightning__FlowScreen</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property label="Record Id" name="recordId" role="inputOnly" type="String" />
+            <property label="City" name="city" role="inputOnly" type="String" />
+            <property label="State / Region" name="state" role="inputOnly" type="String" />
+            <property label="Country" name="country" role="inputOnly" type="String" />
+            <property label="Latitude" name="latitude" role="inputOnly" type="String" />
+            <property label="Longitude" name="longitude" role="inputOnly" type="String" />
+            <property label="Mode" name="mode" role="inputOnly" type="String" default="auto" />
+            <property label="Allow Browser Location" name="allowBrowserLocation" role="inputOnly" type="Boolean" default="true" />
+            <property label="Load Automatically" name="autoLoad" role="inputOnly" type="Boolean" default="false" />
+            <property label="Resolved Location" name="resolvedLocation" role="outputOnly" type="String" />
+            <property label="Resolved Latitude" name="resolvedLatitude" role="outputOnly" type="String" />
+            <property label="Resolved Longitude" name="resolvedLongitude" role="outputOnly" type="String" />
+            <property label="Temperature" name="temperature" role="outputOnly" type="String" />
+            <property label="Humidity" name="humidity" role="outputOnly" type="String" />
+            <property label="Wind Speed" name="windSpeed" role="outputOnly" type="String" />
+            <property label="Condition" name="condition" role="outputOnly" type="String" />
+            <property label="Icon Name" name="iconName" role="outputOnly" type="String" />
+            <property label="Report Text" name="reportText" role="outputOnly" type="String" />
+            <property label="Has Weather" name="hasWeather" role="outputOnly" type="Boolean" />
+            <property label="Error Message" name="errorMessage" role="outputOnly" type="String" />
+        </targetConfig>
+        <targetConfig targets="lightning__HomePage">
+            <property label="Mode" name="mode" type="String" default="auto" />
+            <property label="Allow Browser Location" name="allowBrowserLocation" type="Boolean" default="true" />
+            <property label="Load Automatically" name="autoLoad" type="Boolean" default="false" />
+        </targetConfig>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Account</object>
+            </objects>
+            <property label="Mode" name="mode" type="String" default="auto" />
+            <property label="Allow Browser Location" name="allowBrowserLocation" type="Boolean" default="false" />
+            <property label="Load Automatically" name="autoLoad" type="Boolean" default="true" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

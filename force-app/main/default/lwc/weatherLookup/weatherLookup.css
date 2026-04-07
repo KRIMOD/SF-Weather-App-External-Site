@@ -1,0 +1,72 @@
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.spinner-shell {
+    min-height: 4rem;
+    position: relative;
+}
+
+.weather-summary {
+    background: linear-gradient(135deg, #f3f6fb 0%, #ffffff 100%);
+    border: 1px solid #d8dde6;
+    border-radius: 0.75rem;
+    padding: 1rem;
+}
+
+.summary-header {
+    align-items: center;
+    display: flex;
+}
+
+.weather-glyph {
+    align-items: center;
+    background: #ffffff;
+    border-radius: 9999px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+    display: flex;
+    font-size: 1.75rem;
+    height: 3rem;
+    justify-content: center;
+    line-height: 1;
+    width: 3rem;
+}
+
+.location-name {
+    color: #080707;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.condition-text {
+    color: #3e3e3c;
+    margin-top: 0.25rem;
+}
+
+.meta-text {
+    color: #706e6b;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.metric-card {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+    padding: 0.75rem;
+}
+
+.metric-label {
+    color: #706e6b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.metric-value {
+    color: #080707;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+}
